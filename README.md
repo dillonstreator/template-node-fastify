@@ -6,6 +6,7 @@ A minimal production-ready node HTTP server with [`Fastify`](https://fastify.dev
 ✅ Graceful shutdown \
 ✅ Optional Tracing with OpenTelemetry (configurable via environment variables) \
 ✅ Properly configured request payload size limiting to help prevent Denial of Service attack vectors \
+✅ Auto-generated Swagger/OpenAPI documentation \
 ✅ `AbortSignal` propagation to prevent unnecessary work (includes example and test)  \
 ✅ Structured logging with [`pino`](https://github.com/pinojs/pino) \
 ✅ Rich request logging middleware including request id, trace id, context propagation, and more \
