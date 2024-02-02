@@ -14,7 +14,7 @@ A minimal production-ready node HTTP server with [`Fastify`](https://fastify.dev
 ✅ Testing with [`tap`](https://www.npmjs.com/package/tap) and [`undici`](https://www.npmjs.com/package/undici) \
 ✅ [`helmet`](https://github.com/fastify/fastify-helmet) & [`compression`](https://github.com/fastify/fastify-compress)
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/KwYYFA?referralCode=ToZEjF)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/xeb3TM?referralCode=ToZEjF)
 
 
 ## Installation
