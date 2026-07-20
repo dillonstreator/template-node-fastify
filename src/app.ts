@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import Fastify from 'fastify';
 import pino from 'pino';
@@ -14,6 +16,10 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 
 import { Config } from './config';
+
+const { name: pkgName, version: pkgVersion } = JSON.parse(
+    readFileSync(join(__dirname, '..', 'package.json'), 'utf8')
+) as { name: string; version: string };
 
 declare module 'fastify' {
     interface FastifyRequest {
@@ -34,9 +40,9 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
     await app.register(fastifySwagger, {
         openapi: {
             info: {
-                title: 'template-node-fastify',
-                description: 'template-node-fastify',
-                version: '1.0.0',
+                title: pkgName,
+                description: pkgName,
+                version: pkgVersion,
             },
             servers: [],
         },
