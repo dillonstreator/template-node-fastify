@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify from 'fastify';
 import pino from 'pino';
 import helmet from '@fastify/helmet';
@@ -8,6 +7,7 @@ import {
     serializerCompiler,
     validatorCompiler,
     ZodTypeProvider,
+    jsonSchemaTransform,
 } from 'fastify-type-provider-zod';
 import z from 'zod';
 import fastifySwagger from '@fastify/swagger';
@@ -23,7 +23,7 @@ declare module 'fastify' {
 
 export const initApp = async (config: Config, logger: pino.Logger) => {
     const app = Fastify({
-        logger,
+        loggerInstance: logger,
         trustProxy: true,
         bodyLimit: 1024,
         genReqId: () => randomUUID(),
@@ -31,7 +31,7 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
     app.setValidatorCompiler(validatorCompiler);
     app.setSerializerCompiler(serializerCompiler);
 
-    app.register(fastifySwagger, {
+    await app.register(fastifySwagger, {
         openapi: {
             info: {
                 title: 'template-node-fastify',
@@ -40,11 +40,12 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
             },
             servers: [],
         },
+        transform: jsonSchemaTransform,
     });
 
-    app.register(helmet);
-    app.register(compression);
-    app.register(fastifySwaggerUI, {
+    await app.register(helmet);
+    await app.register(compression);
+    await app.register(fastifySwaggerUI, {
         routePrefix: '/documentation',
     });
 
@@ -137,10 +138,3 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
         },
     };
 };
-
-type Store = {
-    logger: pino.Logger;
-    requestId: string;
-};
-
-const asl = new AsyncLocalStorage<Store>();
