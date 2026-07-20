@@ -1,29 +1,34 @@
-FROM node as builder
+FROM node:22 AS builder
 
 WORKDIR /usr/src/app
 
-COPY package.json yarn.lock ./
+RUN corepack enable
 
-RUN yarn install --frozen-lockfile
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN yarn build
+RUN pnpm build
 
-FROM node:slim
-
-ENV NODE_ENV production
-USER node
+FROM node:22-slim
 
 WORKDIR /usr/src/app
 
-COPY package.json yarn.lock ./
+RUN corepack enable
 
-RUN yarn install --production --frozen-lockfile
+COPY package.json pnpm-lock.yaml .npmrc ./
 
-COPY --from=builder /usr/src/app/dist ./dist
+RUN pnpm install --prod --frozen-lockfile \
+    && chown -R node:node /usr/src/app
 
-ENV PORT 3000
+COPY --from=builder --chown=node:node /usr/src/app/dist ./dist
+
+USER node
+
+ENV NODE_ENV=production
+ENV PORT=3000
 EXPOSE $PORT
 
 CMD [ "node", "dist/index.js" ]

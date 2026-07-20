@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { AsyncLocalStorage } from 'node:async_hooks';
 import Fastify from 'fastify';
 import pino from 'pino';
 import helmet from '@fastify/helmet';
@@ -8,12 +9,17 @@ import {
     serializerCompiler,
     validatorCompiler,
     ZodTypeProvider,
+    jsonSchemaTransform,
 } from 'fastify-type-provider-zod';
 import z from 'zod';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 
 import { Config } from './config';
+
+const { name: pkgName, version: pkgVersion } = JSON.parse(
+    readFileSync(join(__dirname, '..', 'package.json'), 'utf8')
+) as { name: string; version: string };
 
 declare module 'fastify' {
     interface FastifyRequest {
@@ -23,7 +29,7 @@ declare module 'fastify' {
 
 export const initApp = async (config: Config, logger: pino.Logger) => {
     const app = Fastify({
-        logger,
+        loggerInstance: logger,
         trustProxy: true,
         bodyLimit: 1024,
         genReqId: () => randomUUID(),
@@ -31,20 +37,21 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
     app.setValidatorCompiler(validatorCompiler);
     app.setSerializerCompiler(serializerCompiler);
 
-    app.register(fastifySwagger, {
+    await app.register(fastifySwagger, {
         openapi: {
             info: {
-                title: 'template-node-fastify',
-                description: 'template-node-fastify',
-                version: '1.0.0',
+                title: pkgName,
+                description: pkgName,
+                version: pkgVersion,
             },
             servers: [],
         },
+        transform: jsonSchemaTransform,
     });
 
-    app.register(helmet);
-    app.register(compression);
-    app.register(fastifySwaggerUI, {
+    await app.register(helmet);
+    await app.register(compression);
+    await app.register(fastifySwaggerUI, {
         routePrefix: '/documentation',
     });
 
@@ -137,10 +144,3 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
         },
     };
 };
-
-type Store = {
-    logger: pino.Logger;
-    requestId: string;
-};
-
-const asl = new AsyncLocalStorage<Store>();
