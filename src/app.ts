@@ -16,6 +16,7 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 
 import { Config } from './config';
+import { AppLogController } from './logging';
 
 const { name: pkgName, version: pkgVersion } = JSON.parse(
     readFileSync(join(__dirname, '..', 'package.json'), 'utf8')
@@ -33,6 +34,7 @@ export const initApp = async (config: Config, logger: pino.Logger) => {
         trustProxy: true,
         bodyLimit: 1024,
         genReqId: () => randomUUID(),
+        logController: new AppLogController(),
     });
     app.setValidatorCompiler(validatorCompiler);
     app.setSerializerCompiler(serializerCompiler);
