@@ -4,35 +4,24 @@ import {
     FastifyRequest,
     LogController,
 } from 'fastify';
-import {
-    ATTR_CLIENT_ADDRESS,
-    ATTR_CLIENT_PORT,
-    ATTR_HTTP_REQUEST_METHOD,
-    ATTR_HTTP_RESPONSE_STATUS_CODE,
-    ATTR_HTTP_ROUTE,
-    ATTR_SERVER_ADDRESS,
-    ATTR_URL_PATH,
-    ATTR_USER_AGENT_ORIGINAL,
-} from '@opentelemetry/semantic-conventions';
 
 import { Config } from './config';
 
-/** Aligns with OpenTelemetry / ECS-style HTTP attribute naming. */
-export const REQUEST_ID_LOG_LABEL = 'http.request.id';
+export const REQUEST_ID_LOG_LABEL = 'request_id';
 export const DURATION_MS_LOG_LABEL = 'duration_ms';
 
 export const serializeRequest = (req: FastifyRequest) => ({
-    [ATTR_HTTP_REQUEST_METHOD]: req.method,
-    [ATTR_URL_PATH]: req.url,
-    [ATTR_HTTP_ROUTE]: req.routeOptions?.url,
-    [ATTR_SERVER_ADDRESS]: req.host,
-    [ATTR_CLIENT_ADDRESS]: req.ip,
-    [ATTR_CLIENT_PORT]: req.socket?.remotePort,
-    [ATTR_USER_AGENT_ORIGINAL]: req.headers['user-agent'],
+    method: req.method,
+    path: req.url,
+    route: req.routeOptions?.url,
+    host: req.host,
+    remote_address: req.ip,
+    remote_port: req.socket?.remotePort,
+    user_agent: req.headers['user-agent'],
 });
 
 export const serializeResponse = (reply: FastifyReply) => ({
-    [ATTR_HTTP_RESPONSE_STATUS_CODE]: reply.statusCode,
+    status_code: reply.statusCode,
 });
 
 export class AppLogController extends LogController {
