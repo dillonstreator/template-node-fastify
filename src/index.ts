@@ -9,8 +9,9 @@ const main = async () => {
     const logger = await initLogging(config);
     const app = await initApp(config, logger);
 
-    app.fastify.listen({
+    await app.fastify.listen({
         port: config.port,
+        host: '0.0.0.0',
     });
 
     gracefulShutdown(app.fastify.server, {
